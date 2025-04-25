@@ -1,0 +1,225 @@
+# Byte-compiled / optimized / DLL files
+echo ##active_line2##
+__pycache__/
+echo ##active_line3##
+*.py[cod]
+echo ##active_line4##
+*.class
+echo ##active_line5##
+
+echo ##active_line6##
+# C extensions
+echo ##active_line7##
+*.so
+echo ##active_line8##
+
+echo ##active_line9##
+# Distribution / packaging
+echo ##active_line10##
+.Python
+echo ##active_line11##
+build/
+echo ##active_line12##
+develop-eggs/
+echo ##active_line13##
+dist/
+echo ##active_line14##
+downloads/
+echo ##active_line15##
+eggs/
+echo ##active_line16##
+.eggs/
+echo ##active_line17##
+lib/
+echo ##active_line18##
+lib64/
+echo ##active_line19##
+parts/
+echo ##active_line20##
+sdist/
+echo ##active_line21##
+var/
+echo ##active_line22##
+*.egg-info/
+echo ##active_line23##
+.installed.cfg
+echo ##active_line24##
+*.egg
+echo ##active_line25##
+
+echo ##active_line26##
+# PyInstaller
+echo ##active_line27##
+*.manifest
+echo ##active_line28##
+*.spec
+echo ##active_line29##
+
+echo ##active_line30##
+# Installer logs
+echo ##active_line31##
+pip-log.txt
+echo ##active_line32##
+pip-delete-this-directory.txt
+echo ##active_line33##
+
+echo ##active_line34##
+# Unit test / coverage reports
+echo ##active_line35##
+htmlcov/
+echo ##active_line36##
+.tox/
+echo ##active_line37##
+.nox/
+echo ##active_line38##
+.coverage
+echo ##active_line39##
+.coverage.*
+echo ##active_line40##
+.cache
+echo ##active_line41##
+nosetests.xml
+echo ##active_line42##
+coverage.xml
+echo ##active_line43##
+*.cover
+echo ##active_line44##
+*.py,cover
+echo ##active_line45##
+.hypothesis/
+echo ##active_line46##
+.pytest_cache/
+echo ##active_line47##
+
+echo ##active_line48##
+# Translations
+echo ##active_line49##
+*.mo
+echo ##active_line50##
+*.pot
+echo ##active_line51##
+
+echo ##active_line52##
+# Django stuff:
+echo ##active_line53##
+*.log
+echo ##active_line54##
+local_settings.py
+echo ##active_line55##
+db.sqlite3
+echo ##active_line56##
+
+echo ##active_line57##
+# Flask stuff:
+echo ##active_line58##
+instance/
+echo ##active_line59##
+.webassets-cache
+echo ##active_line60##
+
+echo ##active_line61##
+# Scrapy stuff:
+echo ##active_line62##
+.scrapy
+echo ##active_line63##
+
+echo ##active_line64##
+# Sphinx documentation
+echo ##active_line65##
+docs/_build/
+echo ##active_line66##
+
+echo ##active_line67##
+# PyBuilder
+echo ##active_line68##
+target/
+echo ##active_line69##
+
+echo ##active_line70##
+# Jupyter Notebook
+echo ##active_line71##
+.ipynb_checkpoints
+echo ##active_line72##
+
+echo ##active_line73##
+# IPython
+echo ##active_line74##
+.profile_default/
+echo ##active_line75##
+ipython_config.py
+echo ##active_line76##
+
+echo ##active_line77##
+# Celery stuff
+echo ##active_line78##
+celerybeat-schedule
+echo ##active_line79##
+celerybeat.pid
+echo ##active_line80##
+
+echo ##active_line81##
+# SageMath parsed files
+echo ##active_line82##
+*.sage.py
+echo ##active_line83##
+
+echo ##active_line84##
+# Environments
+echo ##active_line85##
+.env
+echo ##active_line86##
+.venv
+echo ##active_line87##
+env/
+echo ##active_line88##
+venv/
+echo ##active_line89##
+ENV/
+echo ##active_line90##
+env.bak/
+echo ##active_line91##
+venv.bak/
+echo ##active_line92##
+
+echo ##active_line93##
+# Spyder project settings
+echo ##active_line94##
+.spyderproject
+echo ##active_line95##
+.spyproject
+echo ##active_line96##
+
+echo ##active_line97##
+# Rope project settings
+echo ##active_line98##
+.ropeproject
+echo ##active_line99##
+
+echo ##active_line100##
+# mkdocs documentation
+echo ##active_line101##
+/site
+echo ##active_line102##
+
+echo ##active_line103##
+# mypy
+echo ##active_line104##
+.mypy_cache/
+echo ##active_line105##
+
+echo ##active_line106##
+# Pycharm
+echo ##active_line107##
+.idea/
+echo ##active_line108##
+
+echo ##active_line109##
+# macOS
+echo ##active_line110##
+.DS_Store
+echo ##active_line111##
+
+echo ##active_line112##
+# VS Code
+echo ##active_line113##
+.vscode/
