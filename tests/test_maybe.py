@@ -6,7 +6,7 @@ def test_maybe_bind_success():
         m.bind(lambda x: Maybe(x + 1))
          .bind(lambda x: Maybe(x * 2))
     )
-    assert result.value == 8
+    assert result._value == 8
 
 def test_maybe_bind_none():
     m = Maybe(None)
@@ -14,4 +14,4 @@ def test_maybe_bind_none():
         m.bind(lambda x: Maybe(x + 1))
          .bind(lambda x: Maybe(x * 2))
     )
-    assert result.value is None
+    assert result._value is None
