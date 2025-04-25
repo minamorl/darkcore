@@ -19,19 +19,19 @@ def test_maybe_bind_none():
 def test_maybe_ap_success():
     mf = Maybe(lambda x: x + 2)
     mx = Maybe(3)
-    result = mx.ap(mf)
+    result = mf.ap(mx)
     assert result.get_or_else(0) == 5
 
 def test_maybe_ap_none_function():
     mf = Maybe(None)
     mx = Maybe(3)
-    result = mx.ap(mf)
+    result = mf.ap(mx)
     assert result.is_nothing()
 
 def test_maybe_ap_none_value():
     mf = Maybe(lambda x: x + 2)
     mx = Maybe(None)
-    result = mx.ap(mf)
+    result = mf.ap(mx)
     assert result.is_nothing()
 
 def test_monad_left_identity():

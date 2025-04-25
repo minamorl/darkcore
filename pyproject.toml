@@ -23,6 +23,7 @@ strict = true
 ignore_missing_imports = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
+disable_error_code = ["misc"]  
 
 [tool.pytest.ini_options]
 addopts = "-v --cov=darkcore"

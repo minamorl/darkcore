@@ -5,7 +5,7 @@ A = TypeVar('A')
 B = TypeVar('B')
 C = TypeVar('C')
 
-class Maybe(Generic[C], Monad[C]):
+class Maybe(Generic[C], Functor[C], Monad[C]):
     def __init__(self, value: Union[C, None]) -> None:
         self._value = value
 
@@ -19,13 +19,16 @@ class Maybe(Generic[C], Monad[C]):
         else:
             return Maybe(f(self._value))
 
-    def ap(self, ff: 'Applicative[Callable[[C], B]]') -> 'Maybe[B]':
-        if not isinstance(ff, Maybe):
-            raise TypeError(f'ap expects Maybe, got {type(ff).__name__}')
-        if self._value is None or ff._value is None:
+    map = fmap
+
+    def ap(self, other: 'Maybe[C]') -> 'Maybe[B]':
+        if not isinstance(other, Maybe):
+            raise TypeError(f'ap expects Maybe, got {type(other).__name__}')
+        if self._value is None or other._value is None:
             return Maybe(None)
-        else:
-            return Maybe(ff._value(self._value))
+        if not callable(self._value):
+            raise TypeError(f'ap expects a callable in self, got {type(self._value).__name__}')
+        return Maybe(self._value(other._value))
 
     def bind(self, f: Callable[[C], 'Monad[B]']) -> 'Maybe[B]':
         result = f(self._value) if self._value is not None else Maybe(None)
