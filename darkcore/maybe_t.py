@@ -24,7 +24,7 @@ class MaybeT(Generic[A]):
         """
         m a -> MaybeT m a
         """
-        return MaybeT(monad.bind(lambda x: monad.pure(Maybe(x))))
+        return MaybeT(monad.bind(lambda x: monad.pure(Maybe(x)))) # type: ignore[arg-type]
 
     def map(self, f: Callable[[A], B]) -> MaybeT[B]:
         """
@@ -39,7 +39,7 @@ class MaybeT(Generic[A]):
         MaybeT m (a -> b) -> MaybeT m a -> MaybeT m b
         """
         return MaybeT(
-            self.run.bind(lambda mf:  # type: ignore
+            self.run.bind(lambda mf:
                 fa.run.bind(lambda mx: self.run.pure(mf.ap(mx)))
             )
         )
@@ -52,7 +52,7 @@ class MaybeT(Generic[A]):
             if maybe.is_nothing():
                 return self.run.pure(Maybe(None))
             else:
-                return f(maybe.get_or_else(None)).run 
+                return f(maybe.get_or_else(None)).run
 
         return MaybeT(self.run.bind(step))
 

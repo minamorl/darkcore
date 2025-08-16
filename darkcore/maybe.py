@@ -40,8 +40,10 @@ class Maybe(Monad[A], Generic[A]):
     def is_just(self) -> bool:
         return self._value is not None
 
-    def get_or_else(self, default: A) -> A:
-        return self._value if self._value is not None else default
+    def get_or_else(self, default: Optional[A]) -> A:
+        if self._value is None:
+            return default  # type: ignore[return-value]
+        return self._value
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Maybe) and self._value == other._value
