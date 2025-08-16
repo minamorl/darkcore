@@ -1,4 +1,6 @@
-from typing import Callable, TypeVar, Generic, Protocol, runtime_checkable, Self
+# filepath: darkcore/core.py
+from __future__ import annotations
+from typing import Callable, TypeVar, Generic, Self
 from abc import ABC, abstractmethod
 
 A = TypeVar("A")
@@ -10,21 +12,26 @@ class Applicative(ABC, Generic[A]):
     @abstractmethod
     def pure(cls, value: A) -> Self:
         """
-        値を最小限のコンテキストに持ち上げる。
+        Lift a value into the minimal applicative context.
         """
         raise NotImplementedError
 
     @abstractmethod
     def ap(self, fa: Self) -> Self:
         """
-        self が f (a -> b) を保持しているとき、fa: f a を適用し f b を返す。
+        Apply a wrapped function `self: f (a -> b)` to another applicative `fa: f a`,
+        producing `f b`.
         """
         raise NotImplementedError
+
+    # Operator: Haskell's <*>
+    def __matmul__(self, fa: Self) -> Self:
+        return self.ap(fa)
 
 
 class Monad(Applicative[A], ABC, Generic[A]):
     """
-    Monad: Applicative の拡張。
+    Monad: Extension of Applicative.
     - pure :: a -> m a
     - bind :: m a -> (a -> m b) -> m b
     """
@@ -33,13 +40,22 @@ class Monad(Applicative[A], ABC, Generic[A]):
     @abstractmethod
     def pure(cls, value: A) -> Self:
         """
-        値をモナドのコンテキストに持ち上げる。
+        Lift a value into the monadic context.
         """
         raise NotImplementedError
 
     @abstractmethod
     def bind(self, f: Callable[[A], Self]) -> Self:
         """
-        self が m a を保持しているとき、f: a -> m b を適用し m b を返す。
+        Given self: m a, apply f: a -> m b to produce m b.
         """
         raise NotImplementedError
+
+    # Operator: Haskell's >>=
+    def __rshift__(self, f: Callable[[A], Self]) -> Self:
+        return self.bind(f)
+
+    # Operator: Haskell's <$>
+    def __or__(self, f: Callable[[A], B]) -> Monad[B]:  # type: ignore
+        # default fmap via bind+pure
+        return self.bind(lambda x: self.pure(f(x)))  # type: ignore
