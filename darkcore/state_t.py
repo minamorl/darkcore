@@ -1,54 +1,42 @@
 from __future__ import annotations
-from typing import Callable, Generic, TypeVar
+from typing import Callable, Generic, TypeVar, Any, cast
 from .core import Monad
 
-S = TypeVar("S")  # state type
+S = TypeVar("S")  # state
 A = TypeVar("A")
 B = TypeVar("B")
 
-
 class StateT(Generic[S, A]):
     """
-    StateT: Monad transformer for State.
-    Represents: S -> m (A, S)
-    where m is any Monad.
+    StateT m a ≅ S -> m (a, S)
     """
-
     def __init__(self, run: Callable[[S], Monad[tuple[A, S]]]) -> None:
         self.run = run
 
     @classmethod
-    def lift(cls, monad: Monad[A]) -> StateT[S, A]:
+    def lift(cls, monad: Monad[A]) -> "StateT[S, A]":
         """
-        Lift a monad value into StateT context: m a -> StateT s a
+        m a -> StateT m a
+        実装: s ↦ monad.bind(lambda a: monad.pure((a, s)))
+        mypy に多相性が伝わらないため cast で橋渡し。
         """
-        return StateT(lambda s: monad.bind(lambda a: monad.pure((a, s))))
+        def run(s: S) -> Monad[tuple[A, S]]:
+            def step(a: A) -> Monad[tuple[A, S]]:
+                return cast(Monad[tuple[A, S]], cast(Any, monad).pure((a, s)))
+            return monad.bind(step)
+        return StateT(run)
 
-    @classmethod
-    def pure(cls, value: A) -> StateT[S, A]:
-        """
-        Wrap a raw value into StateT context.
-        """
-        # Note: Needs access to the underlying monad type.
-        # In practice you'd parametrize StateT with a specific monad,
-        # but tests here don't rely on pure, so it's left as a placeholder.
-        raise NotImplementedError("StateT.pure not yet implemented")
-
-    def bind(self, f: Callable[[A], StateT[S, B]]) -> StateT[S, B]:
-        """
-        FlatMap / bind: chain computations while threading state.
-        """
+    def bind(self, f: Callable[[A], "StateT[S, B]"]) -> "StateT[S, B]":
         def new_run(state: S) -> Monad[tuple[B, S]]:
             return self.run(state).bind(
                 lambda pair: f(pair[0]).run(pair[1])
             )
         return StateT(new_run)
 
-    def __rshift__(self, f: Callable[[A], StateT[S, B]]) -> StateT[S, B]:
+    def __rshift__(self, f: Callable[[A], "StateT[S, B]"]) -> "StateT[S, B]":
         return self.bind(f)
 
-    def __call__(self, state: S):
-        """Convenience: st(s) == st.run(s)"""
+    def __call__(self, state: S) -> Monad[tuple[A, S]]:
         return self.run(state)
 
     def __repr__(self) -> str:

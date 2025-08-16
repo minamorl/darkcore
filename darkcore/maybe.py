@@ -1,35 +1,32 @@
-# filepath: darkcore/maybe.py
 from __future__ import annotations
 from typing import Callable, Generic, Optional, TypeVar
-from .core import Monad
 
 A = TypeVar("A")
 B = TypeVar("B")
 
-
-class Maybe(Monad[A], Generic[A]):
+class Maybe(Generic[A]):
     __slots__ = ("_value",)
 
     def __init__(self, value: Optional[A]) -> None:
         self._value = value
 
     @classmethod
-    def pure(cls, value: A) -> Maybe[A]:
+    def pure(cls, value: A) -> "Maybe[A]":
         return cls(value)
 
-    def fmap(self, f: Callable[[A], B]) -> Maybe[B]:
+    def fmap(self, f: Callable[[A], B]) -> "Maybe[B]":
         if self._value is None:
             return Maybe(None)
         return Maybe(f(self._value))
 
     map = fmap  # alias
 
-    def ap(self: Maybe[Callable[[A], B]], fa: Maybe[A]) -> Maybe[B]:
+    def ap(self: "Maybe[Callable[[A], B]]", fa: "Maybe[A]") -> "Maybe[B]":
         if self._value is None or fa._value is None:
             return Maybe(None)
         return Maybe(self._value(fa._value))
 
-    def bind(self, f: Callable[[A], Maybe[B]]) -> Maybe[B]:
+    def bind(self, f: Callable[[A], "Maybe[B]"]) -> "Maybe[B]":
         if self._value is None:
             return Maybe(None)
         return f(self._value)

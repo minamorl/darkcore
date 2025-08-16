@@ -1,12 +1,17 @@
 from __future__ import annotations
-from typing import Callable, Generic, TypeVar, Union
+from typing import Callable, Generic, TypeVar, Any, cast
 from .core import Monad
 
 A = TypeVar("A")
 B = TypeVar("B")
 
+
 class Either(Monad[A], Generic[A]):
-    def map(self, f: Callable[[A], B]) -> Either[B]:
+    # fmap は具象側で実装
+    def fmap(self, f: Callable[[A], B]) -> "Either[B]":
+        raise NotImplementedError
+
+    def map(self, f: Callable[[A], B]) -> "Either[B]":
         return self.fmap(f)
 
     def __eq__(self, other: object) -> bool:
@@ -18,17 +23,18 @@ class Left(Either[A]):
         self.value = value
 
     @classmethod
-    def pure(cls, value: A) -> Right[A]:  # Left.pure は常に Right
+    def pure(cls, value: A) -> "Either[A]":
+        # Left.pure は Right に持ち上げるのが通例
         return Right(value)
 
-    def fmap(self, f: Callable[[A], B]) -> Left[A]:
-        return self
+    def fmap(self, f: Callable[[A], B]) -> "Either[B]":
+        return cast(Either[B], self)
 
-    def bind(self, f: Callable[[A], Either[B]]) -> Left[A]:
-        return self
+    def bind(self, f: Callable[[A], Monad[B]]) -> Monad[B]:
+        return cast(Monad[B], self)
 
-    def ap(self, fa: Either[A]) -> Left[A]:
-        return self
+    def ap(self, fa: "Either[A]") -> "Either[B]":
+        return cast(Either[B], self)
 
     def __repr__(self) -> str:
         return f"Left({self.value!r})"
@@ -39,21 +45,21 @@ class Right(Either[A]):
         self.value = value
 
     @classmethod
-    def pure(cls, value: A) -> Right[A]:
+    def pure(cls, value: A) -> "Either[A]":
         return Right(value)
 
-    def fmap(self, f: Callable[[A], B]) -> Right[B]:
+    def fmap(self, f: Callable[[A], B]) -> "Either[B]":
         return Right(f(self.value))
 
-    def bind(self, f: Callable[[A], Either[B]]) -> Either[B]:
+    # 基底 Monad と同じシグネチャ
+    def bind(self, f: Callable[[A], Monad[B]]) -> Monad[B]:
         return f(self.value)
 
-    def ap(self, fa: Either[A]) -> Either[B]:
+    def ap(self: "Right[Callable[[A], B]]", fa: "Either[A]") -> "Either[B]":
         if isinstance(fa, Right):
-            if callable(self.value):
-                return Right(self.value(fa.value))  # type: ignore
-            raise TypeError("Right.ap expects a callable in self.value")
-        return fa
+            func = self.value  # Callable[[A], B]
+            return Right(func(fa.value))
+        return cast(Either[B], fa)  # Left はそのまま伝播
 
     def __repr__(self) -> str:
         return f"Right({self.value!r})"
