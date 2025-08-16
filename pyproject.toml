@@ -1,9 +1,13 @@
 [tool.poetry]
 name = "darkcore"
 version = "0.1.0"
-description = ""
+description = "Practical functional programming primitives for Python: Monads, Transformers, and DSL operators for safe business logic"
 authors = ["minamorl <minamorl@users.noreply.github.com>"]
+license = "MIT"
 readme = "README.md"
+repository = "https://github.com/yourname/darkcore"
+homepage = "https://github.com/yourname/darkcore"
+keywords = ["monad", "functional", "dsl", "business logic"
 
 [tool.poetry.dependencies]
 python = "^3.12"
