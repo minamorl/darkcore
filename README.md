@@ -155,7 +155,7 @@ print(out, s2)  # alice@42 43
 ## Development
 
 ```bash
-git clone https://github.com/YOURNAME/darkcore
+git clone https://github.com/minamorl/darkcore
 cd darkcore
 poetry install
 poetry run pytest -v --cov=darkcore
