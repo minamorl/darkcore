@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/yourname/darkcore"
 homepage = "https://github.com/yourname/darkcore"
-keywords = ["monad", "functional", "dsl", "business logic"
+keywords = ["monad", "functional", "dsl", "business logic"]
 
 [tool.poetry.dependencies]
 python = "^3.12"
