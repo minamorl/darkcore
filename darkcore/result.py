@@ -20,6 +20,11 @@ class Result(Monad[A], Generic[A]):
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Result) and self.__dict__ == other.__dict__
 
+    def __rshift__(self, f: Callable[[A], "Result[B]"]) -> "Result[B]":
+        return cast(Result[B], self.bind(f))
+
+    def __or__(self, f: Callable[[A], B]) -> "Result[B]":
+        return self.fmap(f)
 
 class Ok(Result[A]):
     def __init__(self, value: A) -> None:
