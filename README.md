@@ -1,0 +1,168 @@
+# darkcore
+
+**darkcore** is a lightweight functional programming toolkit for Python.  
+It brings **Functor / Applicative / Monad** abstractions, classic monads like **Maybe, Either/Result, Reader, Writer, State**,  
+and an expressive **operator DSL** (`|`, `>>`, `@`) that makes Python feel almost like Haskell.
+
+---
+
+## ✨ Features
+
+- Functor / Applicative / Monad base abstractions
+- Core monads implemented:
+  - `Maybe` — handle missing values
+  - `Either` / `Result` — safe error handling
+  - `Reader` — dependency injection / environment
+  - `Writer` — accumulate logs
+  - `State` — stateful computations
+- Monad transformer: `MaybeT`
+- Operator overloads for concise DSL-style code:
+  - `|` → `fmap` (map)
+  - `>>` → `bind` (flatMap)
+  - `@` → `ap` (applicative apply)
+- High test coverage, Monad law tests included
+
+---
+
+## 🚀 Installation
+
+```bash
+pip install darkcore
+```
+
+(or use Poetry)
+
+---
+
+## 🧪 Quick Examples
+
+### Maybe
+
+```python
+from darkcore.maybe import Maybe
+
+m = Maybe(3) | (lambda x: x+1) >> (lambda y: Maybe(y*2))
+print(m)  # Just(8)
+
+n = Maybe(None) | (lambda x: x+1)
+print(n)  # Nothing
+```
+
+---
+
+### Result
+
+```python
+from darkcore.result import Ok, Err
+
+def parse_int(s: str):
+    try:
+        return Ok(int(s))
+    except ValueError:
+        return Err(f"invalid int: {s}")
+
+res = parse_int("42") >> (lambda x: Ok(x * 2))
+print(res)  # Ok(84)
+
+res2 = parse_int("foo") >> (lambda x: Ok(x * 2))
+print(res2)  # Err("invalid int: foo")
+```
+
+---
+
+### Reader
+
+```python
+from darkcore.reader import Reader
+
+get_user = Reader(lambda env: env["user"])
+greet = get_user | (lambda u: f"Hello {u}")
+
+print(greet.run({"user": "Alice"}))  # "Hello Alice"
+```
+
+---
+
+### Writer
+
+```python
+from darkcore.writer import Writer
+
+w = Writer.pure(3).tell("start") >> (lambda x: Writer(x+1, ["inc"]))
+print(w)  # Writer(4, log=['start', 'inc'])
+```
+
+---
+
+### State
+
+```python
+from darkcore.state import State
+
+inc = State(lambda s: (s, s+1))
+prog = inc >> (lambda x: State(lambda s: (x+s, s)))
+
+print(prog.run(1))  # (3, 2)
+```
+
+---
+
+## 📖 Integration Example
+
+```python
+from darkcore.reader import Reader
+from darkcore.writer import Writer
+from darkcore.state import State
+from darkcore.result import Ok, Err
+
+# Reader: get user from environment
+get_user = Reader(lambda env: env.get("user"))
+
+# Result: validate existence
+to_result = lambda user: Err("no user") if user is None else Ok(user)
+
+# Writer: log user
+log_user = lambda user: Writer(user, [f"got user={user}"])
+
+# State: update counter
+update_state = lambda user: State(lambda s: (f"{user}@{s}", s+1))
+
+env = {"user": "alice"}
+
+user = get_user.run(env)
+res = to_result(user) >> (lambda u: Ok(log_user(u)))
+writer = res.value
+print(writer.log)  # ['got user=alice']
+
+out, s2 = update_state(writer.value).run(42)
+print(out, s2)  # alice@42 43
+```
+
+---
+
+## Why?
+
+- **Safer business code**  
+  - Avoid nested `try/except` and `if None` checks  
+  - Express computations declaratively with monads  
+- **Educational value**  
+  - Learn Haskell/FP concepts hands-on in Python  
+- **Expressive DSL**  
+  - `|`, `>>`, `@` make pipelines concise and clear  
+
+---
+
+## Development
+
+```bash
+git clone https://github.com/YOURNAME/darkcore
+cd darkcore
+poetry install
+poetry run pytest -v --cov=darkcore
+```
+
+---
+
+## License
+
+MIT
