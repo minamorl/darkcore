@@ -51,6 +51,19 @@ class Monad(Protocol, Generic[A]):
         ...
 
 
+class SupportsFmapBindAp(Protocol, Generic[A]):
+    """Protocol for types supporting ``fmap``, ``bind`` and ``ap``."""
+
+    def fmap(self, f: Callable[[A], B]) -> Any:  # pragma: no cover - structural
+        ...
+
+    def bind(self, f: Callable[[A], Any]) -> Any:  # pragma: no cover - structural
+        ...
+
+    def ap(self, fa: Any) -> Any:  # pragma: no cover - structural
+        ...
+
+
 class MonadOpsMixin(Generic[A]):
     """演算子 DSL を提供するミックスイン。
 
@@ -59,11 +72,11 @@ class MonadOpsMixin(Generic[A]):
     これらの演算子を利用できる。
     """
 
-    def __or__(self, f: Callable[[A], B]) -> Any:
-        return self.fmap(f)  # type: ignore[attr-defined]
+    def __or__(self: SupportsFmapBindAp[A], f: Callable[[A], B]) -> Any:
+        return self.fmap(f)
 
-    def __rshift__(self, f: Callable[[A], Any]) -> Any:
-        return self.bind(f)  # type: ignore[attr-defined]
+    def __rshift__(self: SupportsFmapBindAp[A], f: Callable[[A], Any]) -> Any:
+        return self.bind(f)
 
-    def __matmul__(self, fa: Any) -> Any:
-        return self.ap(fa)  # type: ignore[attr-defined]
+    def __matmul__(self: SupportsFmapBindAp[A], fa: Any) -> Any:
+        return self.ap(fa)

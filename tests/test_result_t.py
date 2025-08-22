@@ -1,5 +1,9 @@
 from darkcore.result import Ok, Err
 from darkcore.result_t import ResultT
+from darkcore.result_t import ResultT
+from darkcore.result import Ok, Err
+import pytest
+
 
 class DummyMonad:
     """Minimal monad for testing (only carries a value)."""
@@ -66,3 +70,59 @@ def test_ap():
     rtx = ResultT(mx)
     result = rtf.ap(rtx)
     assert result.run == DummyMonad(Ok(12))
+
+
+# Functor laws
+@pytest.mark.parametrize("x", [1, 2])
+def test_result_t_functor_identity(x):
+    m = ResultT.lift(DummyMonad(x))
+    assert m.fmap(lambda a: a) == m
+
+
+def test_result_t_functor_composition():
+    m = ResultT.lift(DummyMonad(3))
+    f = lambda y: y + 1
+    g = lambda y: y * 2
+    assert m.fmap(lambda y: f(g(y))) == m.fmap(g).fmap(f)
+
+
+# Applicative laws
+def test_result_t_applicative_identity():
+    v = ResultT.lift(DummyMonad(3))
+    pure_id = ResultT.lift(DummyMonad(lambda x: x))
+    assert pure_id.ap(v) == v
+
+
+def test_result_t_applicative_homomorphism():
+    f = lambda x: x + 1
+    x = 3
+    left = ResultT.lift(DummyMonad(f)).ap(ResultT.lift(DummyMonad(x)))
+    right = ResultT.lift(DummyMonad(f(x)))
+    assert left == right
+
+
+def test_result_t_applicative_interchange():
+    u = ResultT.lift(DummyMonad(lambda x: x * 2))
+    y = 7
+    left = u.ap(ResultT.lift(DummyMonad(y)))
+    right = ResultT.lift(DummyMonad(lambda f: f(y))).ap(u)
+    assert left == right
+
+
+# Monad laws
+def test_result_t_monad_left_identity():
+    f = lambda x: ResultT.lift(DummyMonad(x + 1))
+    x = 5
+    assert ResultT.lift(DummyMonad(x)).bind(f) == f(x)
+
+
+def test_result_t_monad_right_identity():
+    m = ResultT.lift(DummyMonad(4))
+    assert m.bind(lambda a: ResultT.lift(DummyMonad(a))) == m
+
+
+def test_result_t_monad_associativity():
+    m = ResultT.lift(DummyMonad(3))
+    f = lambda x: ResultT.lift(DummyMonad(x + 1))
+    g = lambda y: ResultT.lift(DummyMonad(y * 2))
+    assert m.bind(f).bind(g) == m.bind(lambda x: f(x).bind(g))

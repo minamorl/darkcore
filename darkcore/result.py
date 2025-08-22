@@ -17,6 +17,9 @@ class Result(MonadOpsMixin[A], Monad[A], Generic[A]):
     def map(self, f: Callable[[A], B]) -> "Result[B]":
         return self.fmap(f)
 
+    def ap(self, fa: "Result[Any]") -> "Result[Any]":  # pragma: no cover - interface
+        raise NotImplementedError
+
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Result) and self.__dict__ == other.__dict__
 

@@ -17,8 +17,10 @@ class MaybeT(Generic[A]):
     def lift(cls, monad: MonadLike[A]) -> "MaybeT[A]":
         return MaybeT(monad.bind(lambda x: monad.pure(Maybe(x))))  # type: ignore[arg-type]
 
-    def map(self, f: Callable[[A], B]) -> "MaybeT[B]":
+    def fmap(self, f: Callable[[A], B]) -> "MaybeT[B]":
         return MaybeT(self.run.bind(lambda maybe: self.run.pure(maybe.fmap(f))))
+
+    map = fmap
 
     def ap(self: "MaybeT[Callable[[A], B]]", fa: "MaybeT[A]") -> "MaybeT[B]":
         return MaybeT(self.run.bind(lambda mf: fa.run.bind(lambda mx: self.run.pure(mf.ap(mx)))))

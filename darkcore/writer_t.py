@@ -27,6 +27,24 @@ class WriterT(Generic[A, W]):
 
         return WriterT(monad.bind(step), combine=combine_fn)
 
+    def fmap(self, f: Callable[[A], B]) -> "WriterT[B, W]":
+        return WriterT(self.run.fmap(lambda pair: (f(pair[0]), pair[1])), combine=self.combine)
+
+    map = fmap
+
+    def ap(self: "WriterT[Callable[[A], B], W]", fa: "WriterT[A, W]") -> "WriterT[B, W]":
+        def step(pair_f: tuple[Callable[[A], B], W]) -> Monad[tuple[B, W]]:
+            return fa.run.bind(
+                lambda pair_a: cast(
+                    Monad[tuple[B, W]],
+                    cast(Any, self.run).pure(
+                        (pair_f[0](pair_a[0]), self.combine(pair_f[1], pair_a[1]))
+                    ),
+                )
+            )
+
+        return WriterT(self.run.bind(step), combine=self.combine)
+
     def bind(self, f: Callable[[A], "WriterT[B, W]"]) -> "WriterT[B, W]":
         def step(pair: tuple[A, W]) -> Monad[tuple[B, W]]:
             (a, log1) = pair
