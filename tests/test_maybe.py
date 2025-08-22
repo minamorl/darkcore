@@ -34,6 +34,17 @@ def test_maybe_ap_none_value():
     result = mf.ap(mx)
     assert result.is_nothing()
 
+
+def test_maybe_ap_operator():
+    mf = Maybe(lambda x: x * 2)
+    mx = Maybe(4)
+    assert (mf @ mx).get_or_else(0) == 8
+
+
+def test_maybe_map_operator():
+    m = Maybe(3) | (lambda x: x + 1)
+    assert m.get_or_else(0) == 4
+
 def test_monad_left_identity():
     f = lambda x: Maybe(x + 1)
     x = 5

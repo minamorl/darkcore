@@ -1,12 +1,12 @@
 from __future__ import annotations
 from typing import Callable, Generic, TypeVar, Any, cast
-from .core import Monad
+from .core import Monad, MonadOpsMixin
 
 A = TypeVar("A")
 B = TypeVar("B")
 
 
-class Either(Monad[A], Generic[A]):
+class Either(MonadOpsMixin[A], Monad[A], Generic[A]):
     # fmap は具象側で実装
     def fmap(self, f: Callable[[A], B]) -> "Either[B]":
         raise NotImplementedError

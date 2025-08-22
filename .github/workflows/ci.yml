@@ -11,5 +11,5 @@ jobs:
           python-version: "3.12"
       - run: pip install poetry
       - run: poetry install
-      - run: poetry run pytest --cov=darkcore
-      - run: poetry run mypy darkcore
+      - run: poetry run pytest -v --cov=darkcore
+      - run: poetry run mypy --strict darkcore

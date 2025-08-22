@@ -1,47 +1,73 @@
 from __future__ import annotations
-from typing import Generic, TypeVar, List, Callable, Any, cast
+from typing import Generic, TypeVar, Callable, Any, cast
 from .core import Monad
 
 A = TypeVar("A")
 B = TypeVar("B")
-W = TypeVar("W")  # ログ型（モノイド想定：ここでは List[W] を連結）
+W = TypeVar("W")  # ログ型（モノイド）
+
 
 class WriterT(Generic[A, W]):
-    """
-    WriterT m a ≅ m (a, w)
-    ここで w はモノイド（リスト連結で代用）。
-    """
-    def __init__(self, run: Monad[tuple[A, List[W]]]) -> None:
+    """Writer モナドトランスフォーマー。``m (a, w)`` を包む。"""
+
+    def __init__(self, run: Monad[tuple[A, W]], combine: Callable[[W, W], W] | None = None) -> None:
         self.run = run
+        self.combine: Callable[[W, W], W] = combine or cast(Callable[[W, W], W], lambda a, b: a + b)
 
     @classmethod
-    def lift(cls, monad: Monad[A], empty_log: List[W]) -> "WriterT[A, W]":
-        """
-        m a -> WriterT m a
-        実装上は: monad.bind(lambda a: monad.pure((a, empty_log)))
-        ただし mypy の型変数不一致を回避するため cast を用いる。
-        """
-        def step(a: A) -> Monad[tuple[A, List[W]]]:
-            # monad.pure は A に限らず「そのモナドの型パラメタ全体」に対して多相だが、
-            # Python の型システムでは単相に見えるため Any/cast で橋渡しする。
-            return cast(Monad[tuple[A, List[W]]],
-                        cast(Any, monad).pure((a, empty_log)))
-        return WriterT(monad.bind(step))
+    def lift(
+        cls, monad: Monad[A], empty_log: W, *, combine: Callable[[W, W], W] | None = None
+    ) -> "WriterT[A, W]":
+        """m a -> WriterT m a"""
+        combine_fn: Callable[[W, W], W] = combine or cast(Callable[[W, W], W], lambda a, b: a + b)
 
-    def bind(self, f: Callable[[A], "WriterT[B, W]"]) -> "WriterT[B, W]":
-        """
-        (a, w1) を取り出し、f(a) の run = m (b, w2) を連鎖。
-        ログは w1 ++ w2（ここではリスト結合）。
-        """
-        def step(pair: tuple[A, List[W]]) -> Monad[tuple[B, List[W]]]:
-            (a, log1) = pair
-            # f(a).run: Monad[(B, List[W])]
-            return f(a).run.bind(
-                lambda res: cast(Monad[tuple[B, List[W]]],
-                                 cast(Any, self.run).pure((res[0], log1 + res[1])))
+        def step(a: A) -> Monad[tuple[A, W]]:
+            # 型変数不一致を回避するため Any/cast を用いる。
+            return cast(Monad[tuple[A, W]], cast(Any, monad).pure((a, empty_log)))
+
+        return WriterT(monad.bind(step), combine=combine_fn)
+
+    @classmethod
+    def pure_with(
+        cls,
+        pure: Callable[[tuple[A, W]], Monad[tuple[A, W]]],
+        value: A,
+        *,
+        empty: Callable[[], W],
+        combine: Callable[[W, W], W] | None = None,
+    ) -> "WriterT[A, W]":
+        """Construct ``WriterT`` with a supplied ``pure`` and ``empty`` (no HKTs)."""
+        return WriterT(pure((value, empty())), combine=combine)
+
+    def fmap(self, f: Callable[[A], B]) -> "WriterT[B, W]":
+        return WriterT(self.run.fmap(lambda pair: (f(pair[0]), pair[1])), combine=self.combine)
+
+    map = fmap
+
+    def ap(self: "WriterT[Callable[[A], B], W]", fa: "WriterT[A, W]") -> "WriterT[B, W]":
+        def step(pair_f: tuple[Callable[[A], B], W]) -> Monad[tuple[B, W]]:
+            return fa.run.bind(
+                lambda pair_a: cast(
+                    Monad[tuple[B, W]],
+                    cast(Any, self.run).pure(
+                        (pair_f[0](pair_a[0]), self.combine(pair_f[1], pair_a[1]))
+                    ),
+                )
             )
 
-        return WriterT(self.run.bind(step))
+        return WriterT(self.run.bind(step), combine=self.combine)
+
+    def bind(self, f: Callable[[A], "WriterT[B, W]"]) -> "WriterT[B, W]":
+        def step(pair: tuple[A, W]) -> Monad[tuple[B, W]]:
+            (a, log1) = pair
+            return f(a).run.bind(
+                lambda res: cast(
+                    Monad[tuple[B, W]],
+                    cast(Any, self.run).pure((res[0], self.combine(log1, res[1]))),
+                )
+            )
+
+        return WriterT(self.run.bind(step), combine=self.combine)
 
     def __rshift__(self, f: Callable[[A], "WriterT[B, W]"]) -> "WriterT[B, W]":
         return self.bind(f)

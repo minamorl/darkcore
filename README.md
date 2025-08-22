@@ -15,7 +15,7 @@ and an expressive **operator DSL** (`|`, `>>`, `@`) that makes Python feel almos
   - `Reader` — dependency injection / environment
   - `Writer` — accumulate logs
   - `State` — stateful computations
-- Monad transformer: `MaybeT`
+- Monad transformers: `MaybeT`, `ResultT`, `ReaderT`, `StateT`, `WriterT`
 - Operator overloads for concise DSL-style code:
   - `|` → `fmap` (map)
   - `>>` → `bind` (flatMap)
@@ -88,8 +88,13 @@ print(greet.run({"user": "Alice"}))  # "Hello Alice"
 ```python
 from darkcore.writer import Writer
 
-w = Writer.pure(3).tell("start") >> (lambda x: Writer(x+1, ["inc"]))
+# list log by default
+w = Writer.pure(3).tell(["start"]) >> (lambda x: Writer(x + 1, ["inc"]))
 print(w)  # Writer(4, log=['start', 'inc'])
+
+# for non-``list`` logs, pass ``empty`` and ``combine`` explicitly
+w2 = Writer("hi", empty=str, combine=str.__add__).tell("!")
+print(w2)  # Writer('hi', log='!')
 ```
 
 ---
@@ -103,6 +108,16 @@ inc = State(lambda s: (s, s+1))
 prog = inc >> (lambda x: State(lambda s: (x+s, s)))
 
 print(prog.run(1))  # (3, 2)
+```
+
+### Operator DSL
+
+```python
+from darkcore.maybe import Maybe
+
+mf = Maybe(lambda x: x * 2)
+mx = Maybe(4)
+print((mf @ mx) | (lambda x: x + 1))  # Just(9)
 ```
 
 ---
