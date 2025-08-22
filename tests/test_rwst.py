@@ -10,6 +10,27 @@ def combine_list(a, b):
     return a + b
 
 
+def test_rwst_extensional_equality_basic():
+    combine = lambda a, b: a + b
+    empty = list
+    r1 = RWST(lambda r, s: Ok(((s + r, s), ["a"])), combine=combine, empty=empty)
+    r2 = RWST(lambda r, s: Ok(((s + r, s), ["a"])), combine=combine, empty=empty)
+    for env in [0, 1, 2]:
+        for st in [0, 3]:
+            assert r1.run(env, st) == r2.run(env, st)
+
+
+def test_rwst_applicative_identity_extensional():
+    combine = lambda a, b: a + b
+    empty = list
+    pure = Ok.pure
+    fa = RWST.pure_with(pure, 5, combine=combine, empty=empty)
+    identity = RWST.pure_with(pure, lambda x: x, combine=combine, empty=empty).ap(fa)
+    for env in [0, 1]:
+        for st in [2, 3]:
+            assert identity.run(env, st) == fa.run(env, st)
+
+
 def test_functor_applicative_monad_laws():
     empty = list
     pure = Ok.pure

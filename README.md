@@ -87,6 +87,8 @@ print(v)  # Failure(['non-positive', 'non-positive'])
 # Result would stop at the first failure
 ```
 
+Validation is primarily intended for Applicative composition; `bind` short-circuits like `Result` and is not recommended for error accumulation scenarios.
+
 ---
 
 ### Reader
@@ -151,6 +153,8 @@ def parse_int(s: str):
 print(traverse_result(["1", "2"], parse_int))  # Ok([1, 2])
 print(traverse_result(["1", "x"], parse_int))  # Err("bad: x")
 ```
+
+`Result` short-circuits on the first `Err` in `traverse_*` / `sequence_*`, whereas `Validation` accumulates errors under Applicative composition.
 
 ### RWST
 

@@ -38,3 +38,9 @@ def test_liftA2_and_sequence():
     assert liftA2(add, fa, fb) == Ok(5)
     assert left_then(fa, fb) == Ok(2)
     assert then_right(fa, fb) == Ok(3)
+
+
+def test_sequence_maybe_boundary_cases():
+    assert sequence_maybe([]) == Maybe.pure([])
+    assert sequence_maybe([Maybe(1), Maybe(2)]) == Maybe([1, 2])
+    assert sequence_maybe([Maybe(1), Maybe(None)]) == Maybe(None)
