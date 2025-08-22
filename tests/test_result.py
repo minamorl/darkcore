@@ -24,3 +24,14 @@ def test_result_laws():
     assert m.bind(Ok.pure) == m
     # 結合律
     assert m.bind(f).bind(g) == m.bind(lambda y: f(y).bind(g))
+
+
+def test_result_map_operator():
+    assert (Ok(3) | (lambda x: x + 1)) == Ok(4)
+
+
+def test_result_ap_operator():
+    rf = Ok(lambda x: x + 1)
+    rx = Ok(2)
+    assert rf @ rx == Ok(3)
+    assert Err("e") @ rx == Err("e")

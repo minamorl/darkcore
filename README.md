@@ -15,7 +15,7 @@ and an expressive **operator DSL** (`|`, `>>`, `@`) that makes Python feel almos
   - `Reader` — dependency injection / environment
   - `Writer` — accumulate logs
   - `State` — stateful computations
-- Monad transformer: `MaybeT`
+- Monad transformers: `MaybeT`, `ResultT`
 - Operator overloads for concise DSL-style code:
   - `|` → `fmap` (map)
   - `>>` → `bind` (flatMap)
@@ -88,7 +88,7 @@ print(greet.run({"user": "Alice"}))  # "Hello Alice"
 ```python
 from darkcore.writer import Writer
 
-w = Writer.pure(3).tell("start") >> (lambda x: Writer(x+1, ["inc"]))
+w = Writer.pure(3).tell(["start"]) >> (lambda x: Writer(x + 1, ["inc"]))
 print(w)  # Writer(4, log=['start', 'inc'])
 ```
 

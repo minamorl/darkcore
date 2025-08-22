@@ -1,11 +1,12 @@
 from __future__ import annotations
 from typing import Callable, Generic, TypeVar, Tuple
+from .core import MonadOpsMixin
 
 S = TypeVar("S")  # State
 A = TypeVar("A")
 B = TypeVar("B")
 
-class State(Generic[S, A]):
+class State(MonadOpsMixin[A], Generic[S, A]):
     def __init__(self, run: Callable[[S], Tuple[A, S]]) -> None:
         self.run = run
 
@@ -17,6 +18,15 @@ class State(Generic[S, A]):
         def new_run(s: S) -> Tuple[B, S]:
             (a, s1) = self.run(s)
             return (f(a), s1)
+        return State(new_run)
+
+    map = fmap
+
+    def ap(self: "State[S, Callable[[A], B]]", fa: "State[S, A]") -> "State[S, B]":
+        def new_run(s: S) -> Tuple[B, S]:
+            (f, s1) = self.run(s)
+            (x, s2) = fa.run(s1)
+            return (f(x), s2)
         return State(new_run)
 
     def bind(self, f: Callable[[A], State[S, B]]) -> State[S, B]:

@@ -27,6 +27,7 @@ class Applicative(Protocol, Generic[A]):
         ...
 
 
+# プロトコル定義
 class Monad(Protocol, Generic[A]):
     """
     構造的サブタイピングで表現した最小限の Monad プロトコル。
@@ -48,3 +49,21 @@ class Monad(Protocol, Generic[A]):
     def fmap(self, f: Callable[[A], B]) -> Monad[B]:
         """文脈付き値に純粋関数を適用して m b を返す"""
         ...
+
+
+class MonadOpsMixin(Generic[A]):
+    """演算子 DSL を提供するミックスイン。
+
+    ``|`` は ``fmap``、``>>`` は ``bind``、``@`` は ``ap`` に対応する。
+    ``fmap``/``bind``/``ap`` を実装する型はこのミックスインを継承するだけで
+    これらの演算子を利用できる。
+    """
+
+    def __or__(self, f: Callable[[A], B]) -> Any:
+        return self.fmap(f)  # type: ignore[attr-defined]
+
+    def __rshift__(self, f: Callable[[A], Any]) -> Any:
+        return self.bind(f)  # type: ignore[attr-defined]
+
+    def __matmul__(self, fa: Any) -> Any:
+        return self.ap(fa)  # type: ignore[attr-defined]

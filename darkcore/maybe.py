@@ -1,10 +1,11 @@
 from __future__ import annotations
 from typing import Callable, Generic, Optional, TypeVar
+from .core import MonadOpsMixin
 
 A = TypeVar("A")
 B = TypeVar("B")
 
-class Maybe(Generic[A]):
+class Maybe(MonadOpsMixin[A], Generic[A]):
     __slots__ = ("_value",)
 
     def __init__(self, value: Optional[A]) -> None:

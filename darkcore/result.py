@@ -1,12 +1,12 @@
 from __future__ import annotations
 from typing import Callable, Generic, TypeVar, Any, cast
-from .core import Monad
+from .core import Monad, MonadOpsMixin
 
 A = TypeVar("A")
 B = TypeVar("B")
 
 
-class Result(Monad[A], Generic[A]):
+class Result(MonadOpsMixin[A], Monad[A], Generic[A]):
     """
     Result は構造的に Monad を満たす成功/失敗の直和型。
     fmap は具象側で実装し、ここではシグネチャだけ宣言する。
@@ -19,12 +19,6 @@ class Result(Monad[A], Generic[A]):
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Result) and self.__dict__ == other.__dict__
-
-    def __rshift__(self, f: Callable[[A], "Result[B]"]) -> "Result[B]":
-        return cast(Result[B], self.bind(f))
-
-    def __or__(self, f: Callable[[A], B]) -> "Result[B]":
-        return self.fmap(f)
 
 class Ok(Result[A]):
     def __init__(self, value: A) -> None:
