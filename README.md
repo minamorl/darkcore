@@ -12,10 +12,13 @@ and an expressive **operator DSL** (`|`, `>>`, `@`) that makes Python feel almos
 - Core monads implemented:
   - `Maybe` — handle missing values
   - `Either` / `Result` — safe error handling
+  - `Validation` — accumulate multiple errors
   - `Reader` — dependency injection / environment
   - `Writer` — accumulate logs
   - `State` — stateful computations
 - Monad transformers: `MaybeT`, `ResultT`, `ReaderT`, `StateT`, `WriterT`
+- Utilities: `traverse`/`sequence`, Applicative combinators
+- Advanced monads: `RWST` (Reader-Writer-State)
 - Operator overloads for concise DSL-style code:
   - `|` → `fmap` (map)
   - `>>` → `bind` (flatMap)
@@ -70,6 +73,24 @@ print(res2)  # Err("invalid int: foo")
 
 ---
 
+### Validation: accumulate errors via Applicative
+
+```python
+from darkcore.validation import Success, Failure
+
+def positive(x: int):
+    return Failure(["non-positive"]) if x <= 0 else Success(x)
+
+v = Success(lambda a: lambda b: a + b).ap(positive(-1)).ap(positive(0))
+print(v)  # Failure(['non-positive', 'non-positive'])
+
+# Result would stop at the first failure
+```
+
+Validation is primarily intended for Applicative composition; `bind` short-circuits like `Result` and is not recommended for error accumulation scenarios.
+
+---
+
 ### Reader
 
 ```python
@@ -115,6 +136,39 @@ inc = State(lambda s: (s, s+1))
 prog = inc >> (lambda x: State(lambda s: (x+s, s)))
 
 print(prog.run(1))  # (3, 2)
+```
+
+### Traverse utilities
+
+```python
+from darkcore.traverse import traverse_result
+from darkcore.result import Ok, Err
+
+def parse_int(s: str):
+    try:
+        return Ok(int(s))
+    except ValueError:
+        return Err(f"bad: {s}")
+
+print(traverse_result(["1", "2"], parse_int))  # Ok([1, 2])
+print(traverse_result(["1", "x"], parse_int))  # Err("bad: x")
+```
+
+`Result` short-circuits on the first `Err` in `traverse_*` / `sequence_*`, whereas `Validation` accumulates errors under Applicative composition.
+
+### RWST
+
+```python
+from darkcore.rwst import RWST
+from darkcore.result import Ok
+
+combine = lambda a, b: a + b
+
+action = RWST.ask(Ok.pure, combine=combine, empty=list).bind(
+    lambda env: RWST.tell([env], Ok.pure, combine=combine, empty=list)
+)
+
+print(action(1, 0))  # Ok(((None, 0), [1]))
 ```
 
 ### Operator DSL
