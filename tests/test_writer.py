@@ -63,6 +63,17 @@ def test_writer_applicative_interchange(factory):
     right = factory(lambda f: f(y)) @ u
     assert left == right
 
+
+@pytest.mark.parametrize("factory", [writer_list, writer_str])
+def test_writer_applicative_composition(factory):
+    compose = lambda f: lambda g: lambda x: f(g(x))
+    u = factory(lambda x: x + 1)
+    v = factory(lambda x: x * 2)
+    w = factory(3)
+    left = factory(compose) @ u @ v @ w
+    right = u @ (v @ w)
+    assert left == right
+
 # Monad laws
 @pytest.mark.parametrize("factory", [writer_list, writer_str])
 def test_writer_monad_left_identity(factory):
