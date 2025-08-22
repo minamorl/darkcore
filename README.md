@@ -92,8 +92,8 @@ from darkcore.writer import Writer
 w = Writer.pure(3).tell(["start"]) >> (lambda x: Writer(x + 1, ["inc"]))
 print(w)  # Writer(4, log=['start', 'inc'])
 
-# string log with custom empty/combine
-w2 = Writer("hi", empty=str).tell("!")
+# for non-``list`` logs, pass ``empty`` and ``combine`` explicitly
+w2 = Writer("hi", empty=str, combine=str.__add__).tell("!")
 print(w2)  # Writer('hi', log='!')
 ```
 

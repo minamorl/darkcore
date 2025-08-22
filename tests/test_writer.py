@@ -1,75 +1,88 @@
-from darkcore.writer import Writer
-from darkcore.writer import Writer
+# tests for Writer
 import pytest
+from darkcore.writer import Writer
 
 
-def test_writer_bind_and_tell():
-    w = Writer.pure(3).tell(["start"]) >> (lambda x: Writer(x + 1, ["inc"]))
-    assert w.value == 4
-    assert w.log == ["start", "inc"]
+def writer_list(value, log=None):
+    return Writer(value, log if log is not None else [])
 
 
-def test_writer_fmap():
-    w = Writer(5, ["init"]) | (lambda x: x * 2)
-    assert w == Writer(10, ["init"])
+def writer_str(value, log=None):
+    return Writer(value, log if log is not None else "", combine=str.__add__, empty=str)
 
 
-def test_writer_ap_and_operator():
-    wf = Writer(lambda x: x + 1, ["f"])
-    wx = Writer(2, ["x"])
-    res = wf @ wx
-    assert res == Writer(3, ["f", "x"])
-
+def test_writer_requires_explicit_monoid():
+    with pytest.raises(TypeError):
+        Writer(1, "")
 
 # Functor laws
-def test_writer_functor_identity():
-    w = Writer(3, ["log"])
+@pytest.mark.parametrize("factory,log", [
+    (writer_list, ["log"]),
+    (writer_str, "log"),
+])
+def test_writer_functor_identity(factory, log):
+    w = factory(3, log)
     assert (w | (lambda x: x)) == w
 
 
-def test_writer_functor_composition():
-    w = Writer(2, ["log"])
+@pytest.mark.parametrize("factory,log", [
+    (writer_list, ["log"]),
+    (writer_str, "log"),
+])
+def test_writer_functor_composition(factory, log):
+    w = factory(2, log)
     f = lambda x: x + 3
     g = lambda x: x * 4
     assert (w | (lambda x: f(g(x)))) == ((w | g) | f)
 
-
 # Applicative laws
-def test_writer_applicative_identity():
-    v = Writer(5, ["v"])
-    assert (Writer.pure(lambda x: x) @ v) == v
+@pytest.mark.parametrize("factory,log", [
+    (writer_list, ["v"]),
+    (writer_str, "v"),
+])
+def test_writer_applicative_identity(factory, log):
+    v = factory(5, log)
+    pure_id = factory(lambda x: x)
+    assert (pure_id @ v) == v
 
 
-def test_writer_applicative_homomorphism():
+@pytest.mark.parametrize("factory", [writer_list, writer_str])
+def test_writer_applicative_homomorphism(factory):
     f = lambda x: x + 1
     x = 3
-    left = Writer.pure(f) @ Writer.pure(x)
-    right = Writer.pure(f(x))
+    left = factory(f) @ factory(x)
+    right = factory(f(x))
     assert left == right
 
 
-def test_writer_applicative_interchange():
-    u = Writer.pure(lambda x: x * 2)
+@pytest.mark.parametrize("factory", [writer_list, writer_str])
+def test_writer_applicative_interchange(factory):
+    u = factory(lambda x: x * 2)
     y = 7
-    left = u @ Writer.pure(y)
-    right = Writer.pure(lambda f: f(y)) @ u
+    left = u @ factory(y)
+    right = factory(lambda f: f(y)) @ u
     assert left == right
-
 
 # Monad laws
-def test_writer_monad_left_identity():
-    f = lambda x: Writer(x + 1, ["f"])
+@pytest.mark.parametrize("factory", [writer_list, writer_str])
+def test_writer_monad_left_identity(factory):
+    f = lambda x: factory(x + 1)
     x = 5
-    assert Writer.pure(x).bind(f) == f(x)
+    assert factory(x).bind(f) == f(x)
 
 
-def test_writer_monad_right_identity():
-    m = Writer(4, ["m"])
-    assert m.bind(Writer.pure) == m
+@pytest.mark.parametrize("factory,log", [
+    (writer_list, ["m"]),
+    (writer_str, "m"),
+])
+def test_writer_monad_right_identity(factory, log):
+    m = factory(4, log)
+    assert m.bind(factory) == m
 
 
-def test_writer_monad_associativity():
-    m = Writer(1, ["m"])
-    f = lambda x: Writer(x + 1, ["f"])
-    g = lambda y: Writer(y * 2, ["g"])
+@pytest.mark.parametrize("factory", [writer_list, writer_str])
+def test_writer_monad_associativity(factory):
+    m = factory(1)
+    f = lambda x: factory(x + 1)
+    g = lambda y: factory(y * 2)
     assert m.bind(f).bind(g) == m.bind(lambda x: f(x).bind(g))

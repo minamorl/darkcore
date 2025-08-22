@@ -18,6 +18,16 @@ class ReaderT(Generic[R, A]):
     def pure(cls, value: A) -> "ReaderT[R, A]":
         raise NotImplementedError("ReaderT.pure not implemented (needs monad context)")
 
+    @classmethod
+    def pure_with(
+        cls, pure: Callable[[A], MonadLike[A]], value: A
+    ) -> "ReaderT[R, A]":
+        """Construct a ``ReaderT`` using a provided ``pure`` for the base monad.
+
+        Needed because Python lacks higher-kinded types.
+        """
+        return ReaderT(lambda _r: pure(value))
+
     def fmap(self, f: Callable[[A], B]) -> "ReaderT[R, B]":
         return ReaderT(lambda env: self.run(env).fmap(f))
 
@@ -42,6 +52,3 @@ class ReaderT(Generic[R, A]):
 
     def __repr__(self) -> str:
         return f"ReaderT({self.run!r})"
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, ReaderT) and self.run == other.run

@@ -27,6 +27,18 @@ class WriterT(Generic[A, W]):
 
         return WriterT(monad.bind(step), combine=combine_fn)
 
+    @classmethod
+    def pure_with(
+        cls,
+        pure: Callable[[tuple[A, W]], Monad[tuple[A, W]]],
+        value: A,
+        *,
+        empty: Callable[[], W],
+        combine: Callable[[W, W], W] | None = None,
+    ) -> "WriterT[A, W]":
+        """Construct ``WriterT`` with a supplied ``pure`` and ``empty`` (no HKTs)."""
+        return WriterT(pure((value, empty())), combine=combine)
+
     def fmap(self, f: Callable[[A], B]) -> "WriterT[B, W]":
         return WriterT(self.run.fmap(lambda pair: (f(pair[0]), pair[1])), combine=self.combine)
 

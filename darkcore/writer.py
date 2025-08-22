@@ -23,8 +23,21 @@ class Writer(MonadOpsMixin[A], Generic[A, W]):
         empty: Callable[[], W] | None = None,
     ) -> None:
         self.value = value
-        self.combine: Callable[[W, W], W] = combine or cast(Callable[[W, W], W], lambda a, b: a + b)
-        self.empty: Callable[[], W] = empty or cast(Callable[[], W], list)
+
+        if combine is None or empty is None:
+            if combine is None and empty is None and (
+                log is None or isinstance(log, list)
+            ):
+                combine = cast(Callable[[W, W], W], lambda a, b: a + b)
+                empty = cast(Callable[[], W], list)
+            else:
+                raise TypeError(
+                    "Writer for non-list logs requires explicit 'combine' and 'empty'"
+                )
+
+        assert combine is not None and empty is not None
+        self.combine = combine
+        self.empty = empty
         self.log: W = log if log is not None else self.empty()
 
     @classmethod
@@ -52,6 +65,12 @@ class Writer(MonadOpsMixin[A], Generic[A, W]):
 
     def tell(self, msg: W) -> "Writer[A, W]":
         return Writer(self.value, self.combine(self.log, msg), combine=self.combine, empty=self.empty)
+
+    def tell1(self: "Writer[A, list[B]]", msg: B) -> "Writer[A, list[B]]":
+        """Append a single element to the log when ``W`` is ``list``."""
+        if self.empty is not list:
+            raise TypeError("tell1 is only available when log type is list")
+        return Writer(self.value, self.combine(self.log, [msg]), combine=self.combine, empty=self.empty)
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Writer) and self.value == other.value and self.log == other.log

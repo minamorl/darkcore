@@ -26,6 +26,13 @@ class StateT(Generic[S, A]):
             return monad.bind(step)
         return StateT(run)
 
+    @classmethod
+    def pure_with(
+        cls, pure: Callable[[tuple[A, S]], Monad[tuple[A, S]]], value: A
+    ) -> "StateT[S, A]":
+        """Construct ``StateT`` with provided ``pure`` (workaround for lack of HKTs)."""
+        return StateT(lambda s: pure((value, s)))
+
     def fmap(self, f: Callable[[A], B]) -> "StateT[S, B]":
         def new_run(s: S) -> Monad[tuple[B, S]]:
             return self.run(s).fmap(lambda pair: (f(pair[0]), pair[1]))
@@ -62,6 +69,3 @@ class StateT(Generic[S, A]):
 
     def __repr__(self) -> str:
         return f"StateT({self.run!r})"
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, StateT) and self.run == other.run
