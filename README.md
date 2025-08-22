@@ -93,8 +93,15 @@ w = Writer.pure(3).tell(["start"]) >> (lambda x: Writer(x + 1, ["inc"]))
 print(w)  # Writer(4, log=['start', 'inc'])
 
 # for non-``list`` logs, pass ``empty`` and ``combine`` explicitly
+# ``empty`` provides the identity element and ``combine`` appends logs
 w2 = Writer("hi", empty=str, combine=str.__add__).tell("!")
 print(w2)  # Writer('hi', log='!')
+
+# omitting these for a non-``list`` log raises ``TypeError``
+try:
+    Writer("hi", "!")  # missing empty/combine
+except TypeError:
+    print("expected TypeError")
 ```
 
 ---

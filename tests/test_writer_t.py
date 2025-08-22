@@ -77,6 +77,20 @@ def test_writer_t_applicative_interchange(factory, log):
     right = factory(lambda f: f(y)).ap(u)
     assert left.run == right.run
 
+
+@pytest.mark.parametrize("factory,log", [
+    (wt_list, None),
+    (wt_str, None),
+])
+def test_writer_t_applicative_composition(factory, log):
+    compose = lambda f: lambda g: lambda x: f(g(x))
+    u = factory(lambda x: x + 1)
+    v = factory(lambda x: x * 2)
+    w = factory(3)
+    left = factory(compose).ap(u).ap(v).ap(w)
+    right = u.ap(v.ap(w))
+    assert left.run == right.run
+
 # Monad laws
 @pytest.mark.parametrize("factory,log", [
     (wt_list, None),

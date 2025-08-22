@@ -24,16 +24,16 @@ class Writer(MonadOpsMixin[A], Generic[A, W]):
     ) -> None:
         self.value = value
 
-        if combine is None or empty is None:
-            if combine is None and empty is None and (
-                log is None or isinstance(log, list)
-            ):
+        if combine is None and empty is None:
+            if log is None or isinstance(log, list):
                 combine = cast(Callable[[W, W], W], lambda a, b: a + b)
                 empty = cast(Callable[[], W], list)
             else:
                 raise TypeError(
                     "Writer for non-list logs requires explicit 'combine' and 'empty'"
                 )
+        elif combine is None or empty is None:
+            raise TypeError("Writer requires both 'combine' and 'empty'")
 
         assert combine is not None and empty is not None
         self.combine = combine
