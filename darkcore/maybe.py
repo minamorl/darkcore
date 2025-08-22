@@ -7,6 +7,7 @@ B = TypeVar("B")
 
 class Maybe(MonadOpsMixin[A], Generic[A]):
     __slots__ = ("_value",)
+    __match_args__ = ("value",)
 
     def __init__(self, value: Optional[A]) -> None:
         self._value = value
@@ -48,3 +49,7 @@ class Maybe(MonadOpsMixin[A], Generic[A]):
 
     def __repr__(self) -> str:
         return "Nothing" if self._value is None else f"Just({self._value!r})"
+
+    @property
+    def value(self) -> Optional[A]:
+        return self._value

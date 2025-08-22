@@ -13,6 +13,7 @@ class Writer(MonadOpsMixin[A], Generic[A, W]):
     ログ型 ``W`` はモノイドを想定し、デフォルトでは ``list`` を用いる。
     ``combine`` を差し替えることで他のモノイドにも対応できる。
     """
+    __match_args__ = ("value", "log")
 
     def __init__(
         self,
