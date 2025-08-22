@@ -37,6 +37,13 @@ def test_reader_t_composition():
     assert res == Ok("user=alice, val=8")
 
 
+def test_reader_t_extensional_equality():
+    r1 = ReaderT(lambda env: Ok(env["x"] + 1))
+    r2 = ReaderT(lambda env: Ok(env["x"] + 1))
+    env = {"x": 2}
+    assert r1.run(env) == r2.run(env)
+
+
 # Functor laws
 @pytest.mark.parametrize("env", [{"x": 1}, {"x": 2}])
 def test_reader_t_functor_identity(env):

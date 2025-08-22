@@ -52,3 +52,13 @@ class ReaderT(Generic[R, A]):
 
     def __repr__(self) -> str:
         return f"ReaderT({self.run!r})"
+
+    def __eq__(self, other: object) -> bool:
+        """Structural equality for ``ReaderT`` is undefined.
+
+        ``ReaderT`` wraps a function ``R -> m a``; comparing these function
+        objects directly would yield identity-based results rather than
+        extensional equality.  Tests should compare outputs of ``run`` with the
+        same environment instead.
+        """
+        return NotImplemented

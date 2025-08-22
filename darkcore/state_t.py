@@ -69,3 +69,12 @@ class StateT(Generic[S, A]):
 
     def __repr__(self) -> str:
         return f"StateT({self.run!r})"
+
+    def __eq__(self, other: object) -> bool:
+        """Structural equality for ``StateT`` is undefined.
+
+        ``StateT`` wraps ``S -> m (a, S)`` functions. Comparing them directly
+        would only check object identity.  Tests should compare the results of
+        ``run`` for the same initial state instead.
+        """
+        return NotImplemented
