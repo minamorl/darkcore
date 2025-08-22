@@ -1,0 +1,40 @@
+name: publish-on-tag
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  pypi:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pipx install poetry
+
+      - run: poetry install --no-root
+
+      - run: poetry run mypy --strict darkcore
+
+      - run: poetry run pytest -v --cov=darkcore
+
+      # PyPI に公開（要: repo secrets に PYPI_TOKEN）
+      - name: Publish to PyPI
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_KEY }}
+        run: poetry publish --build
+
+      # GitHub Release を作成（タグ名=リリース名、ノート自動生成、dist/* を添付）
+      - name: Create GitHub Release (auto notes)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            dist/*
