@@ -17,7 +17,7 @@ jobs:
 
       - run: pipx install poetry
 
-      - run: poetry install --no-root
+      - run: poetry install
 
       - run: poetry run mypy --strict darkcore
 
