@@ -30,8 +30,10 @@ class ResultT(Generic[A]):
         def step(result: Result[A]) -> MonadLike[Any]:
             if isinstance(result, Err):
                 return self.run.pure(result)
-            else:
+            if isinstance(result, Ok):
                 return f(result.value).run
+            # This branch should be unreachable but is included for completeness
+            raise TypeError("Unexpected Result subtype")
         return ResultT(self.run.bind(step))
 
     def __eq__(self, other: object) -> bool:

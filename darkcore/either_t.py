@@ -30,8 +30,10 @@ class EitherT(Generic[A]):
         def step(either: Either[A]) -> MonadLike[Any]:
             if isinstance(either, Left):
                 return self.run.pure(either)
-            else:
+            if isinstance(either, Right):
                 return f(either.value).run
+            # This branch is theoretically unreachable but keeps mypy satisfied
+            raise TypeError("Unexpected Either subtype")
         return EitherT(self.run.bind(step))
 
     def __eq__(self, other: object) -> bool:
