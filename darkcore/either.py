@@ -19,8 +19,14 @@ class Either(MonadOpsMixin[A], Monad[A], Generic[A]):
 
 
 class Left(Either[A]):
+    __match_args__ = ("error",)
+
     def __init__(self, value: A) -> None:
         self.value = value
+
+    @property
+    def error(self) -> A:
+        return self.value
 
     @classmethod
     def pure(cls, value: A) -> "Either[A]":
@@ -41,6 +47,8 @@ class Left(Either[A]):
 
 
 class Right(Either[A]):
+    __match_args__ = ("value",)
+
     def __init__(self, value: A) -> None:
         self.value = value
 

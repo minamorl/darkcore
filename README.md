@@ -181,6 +181,43 @@ mx = Maybe(4)
 print((mf @ mx) | (lambda x: x + 1))  # Just(9)
 ```
 
+### Pattern Matching
+
+```python
+from darkcore.result import Ok, Err
+from darkcore.maybe import Maybe
+from darkcore.either import Right, Left
+from darkcore.writer import Writer
+
+def classify(r):
+    match r:
+        case Ok(v) if v > 10:
+            return ("big", v)
+        case Ok(v):
+            return ("ok", v)
+        case Err(e):
+            return ("err", e)
+
+def maybe_demo(m):
+    match m:
+        case Maybe(value=None):
+            return "nothing"
+        case Maybe(value=v):
+            return v
+
+def either_demo(x):
+    match x:
+        case Right(v):
+            return v
+        case Left(e):
+            return e
+
+w = Writer(3, ["a"], empty=list, combine=lambda a, b: a + b)
+match w:
+    case Writer(v, log=ls):
+        print(v, ls)
+```
+
 ---
 
 ## 📖 Integration Example

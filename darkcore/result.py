@@ -24,6 +24,7 @@ class Result(MonadOpsMixin[A], Monad[A], Generic[A]):
         return isinstance(other, Result) and self.__dict__ == other.__dict__
 
 class Ok(Result[A]):
+    __match_args__ = ("value",)
     def __init__(self, value: A) -> None:
         self.value = value
 
@@ -50,6 +51,7 @@ class Ok(Result[A]):
 
 
 class Err(Result[A]):
+    __match_args__ = ("error",)
     def __init__(self, error: str) -> None:
         self.error = error
 
