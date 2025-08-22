@@ -32,6 +32,12 @@ def test_state_t_composition():
     assert result == Ok(("val=6, state=6", 12))
 
 
+def test_state_t_extensional_equality():
+    s1 = StateT(lambda s: Ok((s + 1, s)))
+    s2 = StateT(lambda s: Ok((s + 1, s)))
+    assert s1.run(2) == s2.run(2)
+
+
 # Functor laws
 @pytest.mark.parametrize("s", [0, 1])
 def test_state_t_functor_identity(s):
