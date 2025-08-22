@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "darkcore"
-version = "0.1.1"
+version = "0.3.0"
 description = "Practical functional programming primitives for Python: Monads, Transformers, and DSL operators for safe business logic"
 authors = ["minamorl <minamorl@users.noreply.github.com>"]
 license = "MIT"
