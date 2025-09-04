@@ -1,15 +1,23 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches: ["main"]
+    tags: ["v*"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "${{ matrix.python-version }}"
       - run: pip install poetry
-      - run: poetry install
-      - run: poetry run pytest -v --cov=darkcore
+      - run: poetry install --with dev
+      - run: poetry run pytest -q
       - run: poetry run mypy --strict darkcore

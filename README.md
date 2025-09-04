@@ -89,6 +89,19 @@ print(v)  # Failure(['non-positive', 'non-positive'])
 
 Validation is primarily intended for Applicative composition; `bind` short-circuits like `Result` and is not recommended for error accumulation scenarios.
 
+### Choosing between `Result`, `Either`, and `Validation`
+
+| Type       | Error shape            | Behavior on bind (`>>`) | Best use case                          |
+|------------|------------------------|--------------------------|----------------------------------------|
+| `Result`   | Typically string/Exception-like | Short-circuits          | IO boundaries, failing effects         |
+| `Either`   | Domain-typed error     | Short-circuits          | Domain errors with rich types          |
+| `Validation` | Accumulates via Applicative | **Short-circuits monadically** | Form-style multi-error accumulation    |
+
+> Note: `Validation` accumulates errors in `Applicative` flows (`@` / `ap`, `traverse`, `sequence_*`), but *monadically* (`>>`) it short-circuits.
+
+### Equality of `ReaderT` / `StateT`
+These transformers represent computations. Equality is **extensional**: compare results of `run` under the same environment/state, not object identity.
+
 ---
 
 ### Reader

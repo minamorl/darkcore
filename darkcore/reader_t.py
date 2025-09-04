@@ -1,3 +1,7 @@
+"""ReaderT monad transformer.
+
+Equality is extensional. Compare outputs of `run` on same inputs.
+"""
 from __future__ import annotations
 from typing import Callable, Generic, TypeVar
 from .core import Monad as MonadLike  # Protocol として使う
