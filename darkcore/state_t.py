@@ -1,3 +1,7 @@
+"""StateT monad transformer.
+
+Equality is extensional. Compare outputs of `run` on same inputs.
+"""
 from __future__ import annotations
 from typing import Callable, Generic, TypeVar, Any, cast
 from .core import Monad
